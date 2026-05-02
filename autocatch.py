@@ -61,8 +61,8 @@ class UltimateCharacterCatcherBot:
 
         # ======== 🎮 CHARACTER CATCHER CONFIG ========
         self.character_bot_username = '@Character_Catcher_Bot'
-        self.grab_bot_username = '@Grab_Your_Waifu_Bot'
-        self.guess_bot_username = '@Catch_Your_Waifu_Bot'
+        self.grab_bot_username = '@Waifu_Grabber_Bot'
+        self.guess_bot_username = '@Husbando_Grabber_Bot'
         self.cheats_bot_username = '@BikaWaifuCheatBot'
 
         self.character_catcher_active = False
