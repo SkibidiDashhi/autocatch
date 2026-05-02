@@ -745,7 +745,7 @@ class UltimateCharacterCatcherBot:
 🎯 Target Bots:
 • {self.character_bot_username} → /catch
 • {self.grab_bot_username} → /grab
-• {self.guess_bot_username} → /guess
+• {self.guess_bot_username} → /grab
 
 🤖 Cheats Bot: {self.cheats_bot_username}
 ⚡ Speed: {self.forward_delay}s forward, {self.catch_delay}s catch
