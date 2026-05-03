@@ -21,7 +21,7 @@ class UltimateCharacterCatcherBot:
         # 🔧 BASIC CONFIGURATION
         self.api_id = '20230268'
         self.api_hash = '72c3bf193f58a0e4b83bfd2b78dadf8c'
-        self.session_name = 'autocatch'
+        self.session_name = 'unknown'
 
         # 👑 ADMIN SYSTEM
         self.admin_users = {5496411145, 7902256131}
@@ -63,7 +63,7 @@ class UltimateCharacterCatcherBot:
         self.character_bot_username = '@Character_Catcher_Bot'
         self.grab_bot_username = '@Waifu_Grabber_Bot'
         self.guess_bot_username = '@Husbando_Grabber_Bot'
-        self.cheats_bot_username = '@BikaWaifuCheatBot'
+        self.cheats_bot_username = '@HusbandosWaifusCheatsBot'
 
         self.character_catcher_active = False
         self.character_catcher_stats = {
