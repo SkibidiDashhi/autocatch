@@ -8,9 +8,9 @@ from telethon import TelegramClient, events
 # 🔧 CONFIGURATION
 API_ID = '27577659'
 API_HASH = '597f9920ee4168c320472f0d8005029a'
-BOT_TOKEN = '8319305833:AAE95QC-ksqom3QboecgUA7x4oC3N6ct0aE'  # Put your bot token here
-ADMIN_IDS = [6593519190, 5496411145, 8201358407]  # List of authorized Admin IDs
-APPROVED_GROUP_ID = -1003857059362    # The only group where the bot works
+BOT_TOKEN = '8314114351:AAFRGFwaB2klPTdXp6CigU5NJpE3vECcEzU'  # Put your bot token here
+ADMIN_IDS = [6593519190, 5496411145]  # List of authorized Admin IDs
+APPROVED_GROUP_ID = -1002839273673    # The only group where the bot works
 
 # 🗄️ DATABASE SETUP
 conn = sqlite3.connect('license_database.db', check_same_thread=False)
@@ -50,7 +50,8 @@ async def start_handler(event):
         "• `/redeem <KEY>` - Activate your subscription\n"
         "• `/status` - Check your active subscription\n\n"
         "*(Admin) • `/gen <amount> <days>` - Generate keys*\n"
-        "*(Admin) • `/trial <amount>` - Generate 2-hour trial keys*"
+        "*(Admin) • `/trial <amount>` - Generate 2-hour trial keys*\n"
+        "*(Admin) • `/auth <user_id> <days>` - Directly authorize user*"
     )
 
 @bot.on(events.NewMessage(pattern=r'(?i)^/gen(?:@\w+)?\s+(\d+)\s+(-?\d+)'))
@@ -116,6 +117,55 @@ async def trial_keys_handler(event):
             f"🎁 **Generated {amount} Trial Keys (2 Hours)**\n\n{key_list}\n\n"
             f"Share these with your users. They can use `/redeem KEY` here."
         )
+    except Exception as e:
+        await event.reply(f"❌ Error: {e}")
+
+@bot.on(events.NewMessage(pattern=r'(?i)^/auth(?:@\w+)?\s+(\d+)\s+(\d+)'))
+async def auth_user_handler(event):
+    """Admin command to directly authorize a user. Usage: /auth <user_id> <days>"""
+    if event.sender_id not in ADMIN_IDS:
+        return await event.reply("❌ Access Denied.")
+
+    try:
+        target_user_id = int(event.pattern_match.group(1))
+        duration_days = int(event.pattern_match.group(2))
+
+        # Security & Overflow checks
+        if duration_days <= 0:
+            return await event.reply("⚠️ Duration must be greater than 0.")
+        if duration_days > 3650:
+            return await event.reply("⚠️ Maximum duration is 3650 days (10 years) to prevent database overflow.")
+
+        now = datetime.now()
+
+        # Check if the user already has an active subscription
+        c.execute("SELECT expires_at FROM active_users WHERE user_id = ?", (target_user_id,))
+        user_data = c.fetchone()
+
+        # Calculate new expiry time (adding to current time if active)
+        try:
+            if user_data and datetime.fromisoformat(user_data[0]) > now:
+                current_expiry = datetime.fromisoformat(user_data[0])
+                new_expiry = current_expiry + timedelta(days=duration_days)
+            else:
+                new_expiry = now + timedelta(days=duration_days)
+        except OverflowError:
+            # If the calculation exceeds Python's limits, cap it
+            new_expiry = datetime.max
+
+        # Directly update the active_users table
+        c.execute("INSERT OR REPLACE INTO active_users (user_id, expires_at) VALUES (?, ?)", (target_user_id, new_expiry.isoformat()))
+        conn.commit()
+
+        await event.reply(
+            f"✅ **DIRECT AUTHORIZATION SUCCESSFUL!** ✅\n\n"
+            f"👤 **Target User ID:** `{target_user_id}`\n"
+            f"⏳ **Added Time:** {duration_days} Days\n"
+            f"📅 **New Expiry:** {new_expiry.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"The user's Auto-Catcher is now active."
+        )
+    except ValueError:
+        await event.reply("❌ **Error:** Please make sure you are typing numbers for the ID and days. Example: `/auth 123456789 30`")
     except Exception as e:
         await event.reply(f"❌ Error: {e}")
 
